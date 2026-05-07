@@ -4,12 +4,16 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceDot,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis
 } from "recharts";
+import { motion } from "framer-motion";
+import { useMemo } from "react";
+import { cardVariants } from "../lib/motion.js";
 
 export type ChartDatum = {
   label: string;
@@ -32,6 +36,18 @@ type ScoreChartProps = {
   axis: ScoreAxis;
   data: ChartDatum[];
   compact?: boolean;
+  showThresholdMarkers?: boolean;
+};
+
+type ChartAnnotationState = {
+  hasProjection: boolean;
+  latestActualPoint: ChartDatum | null;
+  latestGap: number | null;
+  meaningfulGap: boolean;
+  thresholdPoint: {
+    label: string;
+    value: number;
+  } | null;
 };
 
 const axisKeys = {
@@ -75,25 +91,67 @@ function formatSigned(value: number): string {
   return `${rounded >= 0 ? "+" : ""}${rounded.toFixed(1)}`;
 }
 
-export function ScoreChart({ title, axis, data, compact = false }: ScoreChartProps) {
+export function ScoreChart({ title, axis, data, compact = false, showThresholdMarkers = false }: ScoreChartProps) {
   const { user: userKey, shadow: shadowKey, projectedUser, projectedShadow } = axisKeys[axis];
-  const latestActualPoint = [...data]
-    .reverse()
-    .find((point) => numericValue(point, userKey) !== null && numericValue(point, shadowKey) !== null);
-  const latestUser = latestActualPoint ? numericValue(latestActualPoint, userKey) : null;
-  const latestShadow = latestActualPoint ? numericValue(latestActualPoint, shadowKey) : null;
-  const latestGap = latestUser !== null && latestShadow !== null ? latestShadow - latestUser : null;
-  const hasProjection = data.some(
-    (point) => numericValue(point, projectedUser) !== null || numericValue(point, projectedShadow) !== null
-  );
   const threshold = CRITICAL_THRESHOLDS[axis];
+  const annotationState = useMemo<ChartAnnotationState>(() => {
+    const latestActualPoint =
+      [...data]
+        .reverse()
+        .find((point) => numericValue(point, userKey) !== null && numericValue(point, shadowKey) !== null) ?? null;
+    const latestUser = latestActualPoint ? numericValue(latestActualPoint, userKey) : null;
+    const latestShadow = latestActualPoint ? numericValue(latestActualPoint, shadowKey) : null;
+    const latestGap = latestUser !== null && latestShadow !== null ? latestShadow - latestUser : null;
+    const hasProjection = data.some(
+      (point) => numericValue(point, projectedUser) !== null || numericValue(point, projectedShadow) !== null
+    );
+    const projectedCurveKey = hasProjection ? projectedUser : userKey;
+    const thresholdCandidate = showThresholdMarkers
+      ? data.find((point) => {
+          const value = numericValue(point, projectedCurveKey);
+
+          return value !== null && value < threshold;
+        })
+      : undefined;
+    const thresholdValue = thresholdCandidate ? numericValue(thresholdCandidate, projectedCurveKey) : null;
+
+    return {
+      hasProjection,
+      latestActualPoint,
+      latestGap,
+      meaningfulGap: latestGap !== null && latestGap > 15,
+      thresholdPoint:
+        thresholdCandidate && thresholdValue !== null
+          ? {
+              label: thresholdCandidate.label,
+              value: thresholdValue
+            }
+          : null
+    };
+  }, [data, projectedShadow, projectedUser, shadowKey, showThresholdMarkers, threshold, userKey]);
+  const lineOpacity = annotationState.meaningfulGap
+    ? {
+        user: 0.72,
+        shadow: 0.98
+      }
+    : {
+        user: 0.84,
+        shadow: 0.82
+      };
 
   return (
-    <section className="rounded-md border border-[#dfe3ea] bg-white p-4">
+    <motion.section
+      variants={cardVariants}
+      initial="rest"
+      whileHover="hover"
+      className="rounded-md border border-[#dfe3ea] bg-white p-4"
+    >
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className={compact ? "text-base font-semibold" : "text-xl font-semibold"}>{title}</h2>
         <div className="flex flex-wrap justify-end gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-normal text-[#626976]">
-          {latestGap !== null ? <span>gap {formatSigned(latestGap)}</span> : null}
+          {annotationState.meaningfulGap && annotationState.latestGap !== null ? (
+            <span className="text-[#D85A30]">gap {formatSigned(annotationState.latestGap)}</span>
+          ) : null}
           <span>floor {threshold}</span>
           <span>0-100</span>
         </div>
@@ -123,19 +181,41 @@ export function ScoreChart({ title, axis, data, compact = false }: ScoreChartPro
                 borderRadius: 8,
                 boxShadow: "0 8px 22px rgba(32, 33, 36, 0.12)"
               }}
+              wrapperStyle={{ transition: "opacity 180ms cubic-bezier(0.33, 1, 0.68, 1)" }}
+              isAnimationActive
+              animationDuration={180}
+              animationEasing="ease-out"
             />
-            <ReferenceLine y={threshold} stroke="#aeb5c2" strokeDasharray="3 5" />
-            {latestActualPoint ? (
+            {annotationState.thresholdPoint ? (
+              <>
+                <ReferenceLine y={threshold} stroke="#aeb5c2" strokeDasharray="3 5" />
+                <ReferenceDot
+                  x={annotationState.thresholdPoint.label}
+                  y={annotationState.thresholdPoint.value}
+                  r={3.5}
+                  fill="#ffffff"
+                  stroke="#D85A30"
+                  strokeWidth={1.5}
+                  label={{
+                    value: `${threshold}`,
+                    fill: "#D85A30",
+                    fontSize: 11,
+                    position: "top"
+                  }}
+                />
+              </>
+            ) : null}
+            {annotationState.latestActualPoint && annotationState.meaningfulGap ? (
               <ReferenceLine
-                x={latestActualPoint.label}
+                x={annotationState.latestActualPoint.label}
                 stroke="#c9ced8"
                 strokeDasharray="2 5"
                 label={
-                  compact || latestGap === null
+                  compact || annotationState.latestGap === null
                     ? undefined
                     : {
-                        value: `gap ${formatSigned(latestGap)}`,
-                        fill: "#626976",
+                        value: `${formatSigned(annotationState.latestGap)} divergence`,
+                        fill: "#D85A30",
                         fontSize: 12,
                         position: "insideTopRight"
                       }
@@ -149,8 +229,13 @@ export function ScoreChart({ title, axis, data, compact = false }: ScoreChartPro
               name="You"
               stroke="#534AB7"
               strokeWidth={compact ? 2 : 3}
+              strokeOpacity={lineOpacity.user}
               dot={false}
               activeDot={{ r: 5 }}
+              isAnimationActive
+              animationBegin={0}
+              animationDuration={320}
+              animationEasing="ease-out"
             />
             <Line
               type="monotone"
@@ -159,10 +244,15 @@ export function ScoreChart({ title, axis, data, compact = false }: ScoreChartPro
               stroke="#D85A30"
               strokeWidth={compact ? 2 : 3}
               strokeDasharray="7 6"
+              strokeOpacity={lineOpacity.shadow}
               dot={false}
               activeDot={{ r: 5 }}
+              isAnimationActive
+              animationBegin={120}
+              animationDuration={320}
+              animationEasing="ease-out"
             />
-            {hasProjection ? (
+            {annotationState.hasProjection ? (
               <>
                 <Line
                   type="monotone"
@@ -174,6 +264,10 @@ export function ScoreChart({ title, axis, data, compact = false }: ScoreChartPro
                   dot={false}
                   activeDot={false}
                   legendType="none"
+                  isAnimationActive
+                  animationBegin={180}
+                  animationDuration={300}
+                  animationEasing="ease-out"
                 />
                 <Line
                   type="monotone"
@@ -185,12 +279,16 @@ export function ScoreChart({ title, axis, data, compact = false }: ScoreChartPro
                   dot={false}
                   activeDot={false}
                   legendType="none"
+                  isAnimationActive
+                  animationBegin={260}
+                  animationDuration={300}
+                  animationEasing="ease-out"
                 />
               </>
             ) : null}
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </section>
+    </motion.section>
   );
 }

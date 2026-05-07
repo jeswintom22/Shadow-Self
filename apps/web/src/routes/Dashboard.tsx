@@ -15,12 +15,14 @@ import {
   type HabitLog,
   type ScoreAxis
 } from "@shadow-self/shared";
+import { motion } from "framer-motion";
 import { Database } from "lucide-react";
 import { useMemo } from "react";
 import { EmptyState } from "../components/EmptyState.js";
 import { HabitComparisonTable } from "../components/HabitComparisonTable.js";
 import { ScoreChart } from "../components/ScoreCharts.js";
 import { historyToChartData } from "../lib/chartData.js";
+import { cardVariants } from "../lib/motion.js";
 import { useHabitStore } from "../store/habitStore.js";
 
 type DominantInsight = {
@@ -121,12 +123,14 @@ export function Dashboard() {
     history.length,
     sortedLogs
   ]);
-  const data = historyToChartData(history, projection ?? undefined);
-  const divergenceTrend = calculateDivergenceTrend(history);
+  const data = useMemo(() => historyToChartData(history, projection ?? undefined), [history, projection]);
+  const divergenceTrend = useMemo(() => calculateDivergenceTrend(history), [history]);
   const divergenceMessage = createDivergenceMessage(divergenceTrend.direction, divergenceTrend.weeklyChange);
-  const dominantInsight = latestLog ? getDominantInsight(latestLog) : null;
-  const streakInsight = getStrongestStreak(calculateShadowStreaks(history));
-  const criticalThreshold = projection ? detectCriticalThreshold(projection.user) : null;
+  const dominantInsight = useMemo(() => (latestLog ? getDominantInsight(latestLog) : null), [latestLog]);
+  const streakInsight = useMemo(() => getStrongestStreak(calculateShadowStreaks(history)), [history]);
+  const criticalThreshold = useMemo(() => (projection ? detectCriticalThreshold(projection.user) : null), [
+    projection
+  ]);
   const remainingDays = Math.max(0, 7 - history.length);
 
   if (history.length === 0) {
@@ -165,14 +169,25 @@ export function Dashboard() {
         </div>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-md border border-[#dfe3ea] bg-white p-4">
+      <ScoreChart title="Energy" axis="energy" data={data} showThresholdMarkers={Boolean(projection)} />
+
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <motion.article
+          variants={cardVariants}
+          initial="rest"
+          whileHover="hover"
+          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+        >
           <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Divergence</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">{divergenceMessage}</p>
-          <p className="mt-2 text-xs leading-5 text-[#626976]">Measured across the last seven scored days.</p>
-        </article>
+        </motion.article>
 
-        <article className="rounded-md border border-[#dfe3ea] bg-white p-4">
+        <motion.article
+          variants={cardVariants}
+          initial="rest"
+          whileHover="hover"
+          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+        >
           <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Dominant habit</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">
             {dominantInsight && dominantInsight.percent > 0
@@ -181,10 +196,14 @@ export function Dashboard() {
                 )}% of ${dominantInsight.axis} decline`
               : "No active habit deficit is driving decline"}
           </p>
-          <p className="mt-2 text-xs leading-5 text-[#626976]">Weighted by compliance deficit and score impact.</p>
-        </article>
+        </motion.article>
 
-        <article className="rounded-md border border-[#dfe3ea] bg-white p-4">
+        <motion.article
+          variants={cardVariants}
+          initial="rest"
+          whileHover="hover"
+          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+        >
           <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Shadow wins</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">
             {streakInsight.count > 0
@@ -193,10 +212,14 @@ export function Dashboard() {
                 }`
               : "Shadow has no active score streak"}
           </p>
-          <p className="mt-2 text-xs leading-5 text-[#626976]">Ties break the streak.</p>
-        </article>
+        </motion.article>
 
-        <article className="rounded-md border border-[#dfe3ea] bg-white p-4">
+        <motion.article
+          variants={cardVariants}
+          initial="rest"
+          whileHover="hover"
+          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+        >
           <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Critical threshold</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">
             {criticalThreshold
@@ -214,13 +237,12 @@ export function Dashboard() {
                 )} points.`
               : "Energy 40, focus 45, mood 40."}
           </p>
-        </article>
+        </motion.article>
       </section>
 
-      <ScoreChart title="Energy" axis="energy" data={data} />
       <div className="grid gap-6 lg:grid-cols-2">
-        <ScoreChart title="Focus" axis="focus" data={data} compact />
-        <ScoreChart title="Mood" axis="mood" data={data} compact />
+        <ScoreChart title="Focus" axis="focus" data={data} compact showThresholdMarkers={Boolean(projection)} />
+        <ScoreChart title="Mood" axis="mood" data={data} compact showThresholdMarkers={Boolean(projection)} />
       </div>
 
       {latestLog ? <HabitComparisonTable log={latestLog} /> : null}

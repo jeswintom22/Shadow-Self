@@ -114,10 +114,10 @@ export function Simulation() {
             </article>
           </section>
 
-          <ScoreChart title="Projected energy" axis="energy" data={chartData} />
+          <ScoreChart title="Projected energy" axis="energy" data={chartData} showThresholdMarkers />
           <div className="grid gap-6 lg:grid-cols-2">
-            <ScoreChart title="Projected focus" axis="focus" data={chartData} compact />
-            <ScoreChart title="Projected mood" axis="mood" data={chartData} compact />
+            <ScoreChart title="Projected focus" axis="focus" data={chartData} compact showThresholdMarkers />
+            <ScoreChart title="Projected mood" axis="mood" data={chartData} compact showThresholdMarkers />
           </div>
         </>
       ) : (
