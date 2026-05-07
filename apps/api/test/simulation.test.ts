@@ -100,10 +100,10 @@ describe("POST /api/simulation/run", () => {
     await app.close();
   });
 
-  it("returns a retryable 502 for malformed provider output", async () => {
+  it("returns a retryable 502 for malformed narrative output", async () => {
     const app = await withApp({
       async run() {
-        throw new SimulationProviderError("Claude returned invalid projection JSON.");
+        throw new SimulationProviderError("Claude returned invalid narrative JSON.");
       }
     });
     const response = await app.inject({
@@ -114,7 +114,7 @@ describe("POST /api/simulation/run", () => {
 
     expect(response.statusCode).toBe(502);
     expect(response.json()).toEqual({
-      error: "Claude returned invalid projection JSON.",
+      error: "Claude returned invalid narrative JSON.",
       retryable: true
     });
     await app.close();

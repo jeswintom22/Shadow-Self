@@ -77,7 +77,7 @@ export function Simulation() {
         <div>
           <h1 className="text-3xl font-semibold tracking-normal">Simulation</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#626976]">
-            The backend sends your last seven logs and their Shadow inversions to Claude for a thirty-day projection.
+            The backend calculates the thirty-day paths deterministically, then asks Claude to interpret the result.
           </p>
         </div>
         <button
@@ -93,7 +93,7 @@ export function Simulation() {
 
       {isLoading ? (
         <section className="rounded-md border border-[#dfe3ea] bg-white p-6 text-sm text-[#626976]">
-          Claude is projecting the next thirty days.
+          Calculating the next thirty days, then sending the fixed projection to Claude.
         </section>
       ) : null}
 
