@@ -1,0 +1,18 @@
+import type { Config } from "tailwindcss";
+
+export default {
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        shadowPurple: "#534AB7",
+        shadowCoral: "#D85A30",
+        shadowGreen: "#1D9E75"
+      },
+      fontFamily: {
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"]
+      }
+    }
+  },
+  plugins: []
+} satisfies Config;
