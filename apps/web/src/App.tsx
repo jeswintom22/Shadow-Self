@@ -5,6 +5,7 @@ import { hasCompletedOnboarding } from "./lib/onboarding.js";
 import { Dashboard } from "./routes/Dashboard.js";
 import { LogHabits } from "./routes/LogHabits.js";
 import { Onboarding } from "./routes/Onboarding.js";
+import { Settings } from "./routes/Settings.js";
 import { Simulation } from "./routes/Simulation.js";
 
 export function App() {
@@ -19,6 +20,7 @@ export function App() {
             <Route path="/log" element={<LogHabits />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/simulation" element={<Simulation />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/log" replace />} />
           </Route>
         </Routes>

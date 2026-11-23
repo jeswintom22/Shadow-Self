@@ -46,6 +46,7 @@ export type SimulationVerdict = {
   narrative: SimulationNarrative;
   generatedAt: string;
   lastInputDate: string;
+  source?: "claude" | "template";
 };
 
 export const HABITS = {
@@ -170,7 +171,8 @@ export const simulationVerdictSchema = z.object({
   shadow: z.array(projectionPointSchema).length(30),
   narrative: simulationNarrativeSchema,
   generatedAt: z.string().min(1),
-  lastInputDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+  lastInputDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  source: z.enum(["claude", "template"]).optional()
 });
 
 export const simulationRequestSchema = z.object({

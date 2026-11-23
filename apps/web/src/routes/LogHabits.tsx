@@ -8,6 +8,14 @@ import { habitIcons } from "../components/habitIcons.js";
 import { cardVariants, quickFade } from "../lib/motion.js";
 import { useHabitStore } from "../store/habitStore.js";
 
+const habitHelp: Record<string, string> = {
+  sleep: "Hours of actual sleep last night.",
+  exercise: "Minutes of movement — walks count.",
+  water: "Glasses of water (about 250ml each).",
+  screen_time: "Hours on phone, TV, and games — not work calls.",
+  social: "Hours with friends or family."
+};
+
 export function LogHabits() {
   const navigate = useNavigate();
   const today = useHabitStore((state) => state.today);
@@ -34,8 +42,11 @@ export function LogHabits() {
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-[#626976]">{todayKey}</p>
+        <p className="text-sm font-medium text-muted">{todayKey}</p>
         <h1 className="text-3xl font-semibold tracking-normal">Daily check-in</h1>
+        <p className="text-sm text-muted">
+          {Object.keys(logs).length} of 7 days logged — the full projection unlocks at 7.
+        </p>
       </header>
 
       <ShadowDivergencePreview values={today} />
@@ -53,23 +64,23 @@ export function LogHabits() {
               variants={cardVariants}
               initial="rest"
               whileHover="hover"
-              className="rounded-md border border-[#dfe3ea] bg-white p-4"
+              className="rounded-md border border-line bg-card p-4"
             >
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#f0f2f6] text-[#202124]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-subtle text-ink">
                     <Icon size={20} aria-hidden="true" />
                   </div>
                   <div>
                     <label htmlFor={key} className="block font-semibold">
                       {habit.name}
                     </label>
-                    <p className="text-sm text-[#626976]">
-                      target {formatHabitValue(key, habit.target)}
+                    <p className="text-sm text-muted">
+                      {habitHelp[key]} Target: {formatHabitValue(key, habit.target)}.
                     </p>
                   </div>
                 </div>
-                <output htmlFor={key} className="text-lg font-semibold text-[#534AB7]">
+                <output htmlFor={key} className="text-lg font-semibold text-accent">
                   {formatHabitValue(key, value)}
                 </output>
               </div>
@@ -86,16 +97,16 @@ export function LogHabits() {
                 whileTap={{ scale: 1.012 }}
                 whileFocus={{ scale: 1.006 }}
                 transition={quickFade}
-                className="h-2 w-full origin-center accent-[#534AB7] disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-2 w-full origin-center accent-accent disabled:cursor-not-allowed disabled:opacity-50"
               />
               <motion.p
                 key={`${key}-${shadowValue}`}
                 initial={{ opacity: 0.55 }}
                 animate={{ opacity: 1 }}
                 transition={quickFade}
-                className="mt-3 text-sm text-[#626976]"
+                className="mt-3 text-sm text-muted"
               >
-                Shadow <span className="font-semibold text-[#D85A30]">{formatHabitValue(key, shadowValue)}</span>
+                Shadow <span className="font-semibold text-coral">{formatHabitValue(key, shadowValue)}</span>
               </motion.p>
             </motion.section>
           );
@@ -105,21 +116,19 @@ export function LogHabits() {
           <button
             type="submit"
             disabled={alreadyLogged}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#534AB7] px-4 text-sm font-semibold text-white transition hover:bg-[#473f9c] disabled:cursor-not-allowed disabled:bg-[#b6b1df]"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-accent/40"
           >
             <Save size={17} aria-hidden="true" />
             {alreadyLogged ? "already logged today" : "log my day"}
           </button>
-          {import.meta.env.DEV ? (
-            <button
-              type="button"
-              onClick={handleLoadSampleData}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-[#c9ced8] bg-white px-4 text-sm font-semibold text-[#202124] transition hover:border-[#9aa3b5]"
-            >
-              <Database size={17} aria-hidden="true" />
-              load sample data
-            </button>
-          ) : null}
+          <button
+            type="button"
+            onClick={handleLoadSampleData}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-line-strong bg-card px-4 text-sm font-semibold text-ink transition hover:border-line-strong"
+          >
+            <Database size={17} aria-hidden="true" />
+            try with sample data
+          </button>
         </div>
       </form>
     </div>

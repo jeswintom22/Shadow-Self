@@ -2,6 +2,7 @@ import {
   DEFAULT_TODAY,
   createMockLogs,
   getLatestLogs,
+  habitLogSchema,
   invertLog,
   scoreDay,
   sortLogsOldestFirst,
@@ -12,6 +13,7 @@ import {
   type Scores,
   type SimulationVerdict
 } from "@shadow-self/shared";
+import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 
@@ -44,6 +46,8 @@ export type HabitStore = {
   hasLoggedToday: (date?: string) => boolean;
   getLatestLog: () => HabitLog | null;
   canRunSimulation: () => boolean;
+  exportData: () => string;
+  importData: (json: string) => boolean;
 };
 
 function freshToday(): HabitValues {
@@ -168,6 +172,34 @@ export const useHabitStore = create<HabitStore>()(
         const verdict = get().verdict;
 
         return get().isReady() && Boolean(latestLog) && (!verdict || latestLog!.date > verdict.lastInputDate);
+      },
+      exportData() {
+        return JSON.stringify(
+          {
+            version: 1,
+            logs: sortLogsOldestFirst(Object.values(get().logs))
+          },
+          null,
+          2
+        );
+      },
+      importData(json) {
+        try {
+          const parsed = z.array(habitLogSchema).min(1).safeParse(JSON.parse(json).logs);
+          if (!parsed.success) {
+            return false;
+          }
+
+          set({
+            logs: toLogMap(parsed.data),
+            today: freshToday(),
+            verdict: null
+          });
+
+          return true;
+        } catch {
+          return false;
+        }
       }
     }),
     {

@@ -76,13 +76,13 @@ describe("App flows", () => {
     expect(screen.getByRole("heading", { name: /energy/i })).toBeInTheDocument();
   });
 
-  it("shows the development sample-data control", () => {
+  it("shows the sample-data control", () => {
     window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
     window.history.pushState({}, "", "/log");
 
     render(<App />);
 
-    expect(screen.getByRole("button", { name: /load sample data/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /try with sample data/i })).toBeInTheDocument();
   });
 
   it("enables simulation with seven logs and disables it when the verdict is current", () => {

@@ -3,13 +3,53 @@
 @tailwind utilities;
 
 :root {
-  color: #202124;
-  background: #f7f8fb;
+  --bg: 247 248 251;
+  --card: 255 255 255;
+  --ink: 32 33 36;
+  --soft: 75 81 92;
+  --muted: 98 105 118;
+  --line: 223 227 234;
+  --line-soft: 238 240 244;
+  --line-strong: 201 206 216;
+  --subtle: 240 242 246;
+  --accent: 83 74 183;
+  --accent-hover: 71 63 156;
+  --accent-soft: 238 237 249;
+  --coral: 216 90 48;
+  --green: 29 158 117;
+  --green-soft: 230 246 240;
+  --warn-soft: 255 246 241;
+  --warn-line: 243 201 183;
+  --warn-ink: 157 63 29;
+
+  color: rgb(var(--ink));
+  background: rgb(var(--bg));
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  --bg: 13 14 19;
+  --card: 23 25 33;
+  --ink: 232 234 240;
+  --soft: 176 182 195;
+  --muted: 140 147 162;
+  --line: 45 48 60;
+  --line-soft: 37 40 50;
+  --line-strong: 62 66 80;
+  --subtle: 31 34 44;
+  --accent: 158 152 238;
+  --accent-hover: 176 171 246;
+  --accent-soft: 44 41 82;
+  --coral: 238 126 85;
+  --green: 64 198 154;
+  --green-soft: 20 56 47;
+  --warn-soft: 61 36 26;
+  --warn-line: 105 64 45;
+  --warn-ink: 240 172 141;
 }
 
 * {

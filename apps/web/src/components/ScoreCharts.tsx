@@ -144,13 +144,13 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
       variants={cardVariants}
       initial="rest"
       whileHover="hover"
-      className="rounded-md border border-[#dfe3ea] bg-white p-4"
+      className="rounded-md border border-line bg-card p-4"
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className={compact ? "text-base font-semibold" : "text-xl font-semibold"}>{title}</h2>
-        <div className="flex flex-wrap justify-end gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-normal text-[#626976]">
+        <div className="flex flex-wrap justify-end gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-normal text-muted">
           {annotationState.meaningfulGap && annotationState.latestGap !== null ? (
-            <span className="text-[#D85A30]">gap {formatSigned(annotationState.latestGap)}</span>
+            <span className="text-coral">gap {formatSigned(annotationState.latestGap)}</span>
           ) : null}
           <span>floor {threshold}</span>
           <span>0-100</span>
@@ -159,25 +159,25 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
       <div className={compact ? "h-56" : "h-80"}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="#e6e9ef" vertical={false} />
+            <CartesianGrid stroke="var(--line)" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: "#626976", fontSize: 12 }}
-              axisLine={{ stroke: "#c9ced8" }}
+              tick={{ fill: "var(--muted)", fontSize: 12 }}
+              axisLine={{ stroke: "var(--line-strong)" }}
               tickLine={false}
               interval="preserveStartEnd"
             />
             <YAxis
               domain={[0, 100]}
               ticks={[20, 40, 60, 80]}
-              tick={{ fill: "#626976", fontSize: 12 }}
+              tick={{ fill: "var(--muted)", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               width={32}
             />
             <Tooltip
               contentStyle={{
-                border: "1px solid #dfe3ea",
+                border: "1px solid var(--line)",
                 borderRadius: 8,
                 boxShadow: "0 8px 22px rgba(32, 33, 36, 0.12)"
               }}
@@ -188,17 +188,17 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
             />
             {annotationState.thresholdPoint ? (
               <>
-                <ReferenceLine y={threshold} stroke="#aeb5c2" strokeDasharray="3 5" />
+                <ReferenceLine y={threshold} stroke="var(--muted)" strokeDasharray="3 5" />
                 <ReferenceDot
                   x={annotationState.thresholdPoint.label}
                   y={annotationState.thresholdPoint.value}
                   r={3.5}
-                  fill="#ffffff"
-                  stroke="#D85A30"
+                  fill="var(--card)"
+                  stroke="var(--coral)"
                   strokeWidth={1.5}
                   label={{
                     value: `${threshold}`,
-                    fill: "#D85A30",
+                    fill: "var(--coral)",
                     fontSize: 11,
                     position: "top"
                   }}
@@ -208,14 +208,14 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
             {annotationState.latestActualPoint && annotationState.meaningfulGap ? (
               <ReferenceLine
                 x={annotationState.latestActualPoint.label}
-                stroke="#c9ced8"
+                stroke="var(--line-strong)"
                 strokeDasharray="2 5"
                 label={
                   compact || annotationState.latestGap === null
                     ? undefined
                     : {
                         value: `${formatSigned(annotationState.latestGap)} divergence`,
-                        fill: "#D85A30",
+                        fill: "var(--coral)",
                         fontSize: 12,
                         position: "insideTopRight"
                       }
@@ -227,7 +227,7 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
               type="monotone"
               dataKey={userKey}
               name="You"
-              stroke="#534AB7"
+              stroke="var(--accent)"
               strokeWidth={compact ? 2 : 3}
               strokeOpacity={lineOpacity.user}
               dot={false}
@@ -241,7 +241,7 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
               type="monotone"
               dataKey={shadowKey}
               name="Shadow"
-              stroke="#D85A30"
+              stroke="var(--coral)"
               strokeWidth={compact ? 2 : 3}
               strokeDasharray="7 6"
               strokeOpacity={lineOpacity.shadow}
@@ -258,7 +258,7 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
                   type="monotone"
                   dataKey={projectedUser}
                   name="You projected"
-                  stroke="#534AB7"
+                  stroke="var(--accent)"
                   strokeWidth={compact ? 1.5 : 2}
                   strokeDasharray="2 6"
                   dot={false}
@@ -273,7 +273,7 @@ export function ScoreChart({ title, axis, data, compact = false, showThresholdMa
                   type="monotone"
                   dataKey={projectedShadow}
                   name="Shadow projected"
-                  stroke="#D85A30"
+                  stroke="var(--coral)"
                   strokeWidth={compact ? 1.5 : 2}
                   strokeDasharray="2 6"
                   dot={false}

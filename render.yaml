@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: shadow-self-api
+    runtime: node
+    buildCommand: pnpm install --filter @shadow-self/api... && pnpm --filter @shadow-self/api build
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: API_PORT
+        value: "10000"
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-4-5
+      - key: RATE_LIMIT_MAX
+        value: "10"

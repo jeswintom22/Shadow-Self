@@ -120,3 +120,26 @@ describe("POST /api/simulation/run", () => {
     await app.close();
   });
 });
+
+describe("template fallback", () => {
+  it("returns a template narrative when no API key is configured", async () => {
+    const { createClaudeSimulationService } = await import("../src/services/claudeSimulationService.js");
+    const app = await withApp(createClaudeSimulationService({}));
+    const response = await app.inject({ method: "POST", url: "/api/simulation/run", payload: { logs: createMockLogs() } });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().source).toBe("template");
+    await app.close();
+  });
+
+  it("rate limits repeated requests", async () => {
+    const app = await withApp({ run: vi.fn(async (logs: HabitLog[]) => createVerdict(logs)) });
+    const statuses = [];
+    for (let i = 0; i < 11; i += 1) {
+      statuses.push((await app.inject({ method: "POST", url: "/api/simulation/run", payload: { logs: createMockLogs() } })).statusCode);
+    }
+
+    expect(statuses.at(-1)).toBe(429);
+    await app.close();
+  });
+});

@@ -1,0 +1,13 @@
+[build]
+  base = "apps/web"
+  command = "pnpm install --filter @shadow-self/web... && pnpm --filter @shadow-self/web build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  PNPM_VERSION = "11.0.8"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

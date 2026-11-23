@@ -119,6 +119,18 @@ describe("habit store", () => {
     expect(persisted.state?.today).toBeUndefined();
   });
 
+  it("exports and imports logs", () => {
+    useHabitStore.getState().loadMockData(new Date("2026-05-07T12:00:00"));
+    const backup = useHabitStore.getState().exportData();
+
+    useHabitStore.getState().reset();
+
+    expect(useHabitStore.getState().importData(backup)).toBe(true);
+    expect(Object.keys(useHabitStore.getState().logs)).toHaveLength(7);
+    expect(useHabitStore.getState().importData("not json")).toBe(false);
+    expect(useHabitStore.getState().importData('{"logs":[{"date":"nope"}]}')).toBe(false);
+  });
+
   it("allows rerunning only after newer data is logged", () => {
     const logs = createMockLogs(new Date("2026-05-07T12:00:00"));
     useHabitStore.setState({ logs: Object.fromEntries(logs.map((log) => [log.date, log])) });

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
   calculateProjectionPair,
+  createTemplateNarrative,
   getLatestLogs,
   invertLog,
   simulationNarrativeSchema,
@@ -11,7 +12,7 @@ import {
   type SimulationNarrative
 } from "@shadow-self/shared";
 import type { z } from "zod";
-import { SimulationProviderError, SimulationSetupError, type SimulationService } from "./simulationService.js";
+import { SimulationProviderError, type SimulationService } from "./simulationService.js";
 
 const NARRATIVE_SYSTEM_PROMPT = [
   "You are an observational, non-judgmental habit projection writer.",
@@ -81,31 +82,35 @@ export function createClaudeSimulationService(env: ClaudeSimulationEnv = process
     async run(logs) {
       const apiKey = env.ANTHROPIC_API_KEY;
       const model = env.ANTHROPIC_MODEL;
-
-      if (!apiKey || !model) {
-        throw new SimulationSetupError("ANTHROPIC_API_KEY and ANTHROPIC_MODEL are required to run simulations.");
-      }
-
       const latestLogs = getLatestLogs(logs, 7);
       const shadowLogs = latestLogs.map(invertLog);
-      const client = new Anthropic({ apiKey });
       const projection = calculateProjectionPair(latestLogs);
+      let narrative: SimulationNarrative = createTemplateNarrative(latestLogs, projection);
+      let source: "claude" | "template" = "template";
 
-      const narrative = await requestNarrative(
-        client,
-        model,
-        latestLogs,
-        shadowLogs,
-        projection.user,
-        projection.shadow
-      );
+      if (apiKey && model) {
+        try {
+          narrative = await requestNarrative(
+            new Anthropic({ apiKey }),
+            model,
+            latestLogs,
+            shadowLogs,
+            projection.user,
+            projection.shadow
+          );
+          source = "claude";
+        } catch (error) {
+          console.warn("Claude narrative failed, using template narrative.", error);
+        }
+      }
 
       return simulationVerdictSchema.parse({
         user: projection.user,
         shadow: projection.shadow,
         narrative,
         generatedAt: new Date().toISOString(),
-        lastInputDate: latestLogs.at(-1)?.date
+        lastInputDate: latestLogs.at(-1)?.date,
+        source
       });
     }
   };

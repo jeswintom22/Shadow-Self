@@ -139,16 +139,14 @@ export function Dashboard() {
         title="log seven days to see your shadow diverge"
         description="Your first chart appears as soon as you log a day. The full projection unlocks after seven days."
         action={
-          import.meta.env.DEV ? (
-            <button
-              type="button"
-              onClick={() => loadMockData()}
-              className="inline-flex h-11 items-center gap-2 rounded-md bg-[#202124] px-4 text-sm font-semibold text-white"
-            >
-              <Database size={17} aria-hidden="true" />
-              load sample data
-            </button>
-          ) : undefined
+          <button
+            type="button"
+            onClick={() => loadMockData()}
+            className="inline-flex h-11 items-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-card"
+          >
+            <Database size={17} aria-hidden="true" />
+            try with sample data
+          </button>
         }
       />
     );
@@ -158,13 +156,13 @@ export function Dashboard() {
     <div className="space-y-6">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-normal">Dashboard</h1>
-        <p className="max-w-2xl text-sm leading-6 text-[#626976]">
+        <p className="max-w-2xl text-sm leading-6 text-muted">
           The solid line is you. The dashed line is the Shadow computed from the same habit math.
         </p>
       </header>
 
       {remainingDays > 0 ? (
-        <div className="rounded-md border border-[#f3c9b7] bg-[#fff6f1] px-4 py-3 text-sm font-medium text-[#9d3f1d]">
+        <div className="rounded-md border border-warn-line bg-warn-soft px-4 py-3 text-sm font-medium text-warn-ink">
           {remainingDays} more {remainingDays === 1 ? "day" : "days"} until your shadow fully diverges.
         </div>
       ) : null}
@@ -176,20 +174,20 @@ export function Dashboard() {
           variants={cardVariants}
           initial="rest"
           whileHover="hover"
-          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+          className="rounded-md border border-line bg-card p-4"
         >
-          <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Divergence</p>
-          <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">{divergenceMessage}</p>
+          <p className="text-xs font-semibold uppercase tracking-normal text-muted">Divergence</p>
+          <p className="mt-3 text-sm font-semibold leading-6 text-ink">{divergenceMessage}</p>
         </motion.article>
 
         <motion.article
           variants={cardVariants}
           initial="rest"
           whileHover="hover"
-          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+          className="rounded-md border border-line bg-card p-4"
         >
-          <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Dominant habit</p>
-          <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">
+          <p className="text-xs font-semibold uppercase tracking-normal text-muted">Dominant habit</p>
+          <p className="mt-3 text-sm font-semibold leading-6 text-ink">
             {dominantInsight && dominantInsight.percent > 0
               ? `${HABITS[dominantInsight.habit].name} is driving ${Math.round(
                   dominantInsight.percent
@@ -202,10 +200,10 @@ export function Dashboard() {
           variants={cardVariants}
           initial="rest"
           whileHover="hover"
-          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+          className="rounded-md border border-line bg-card p-4"
         >
-          <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Shadow wins</p>
-          <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">
+          <p className="text-xs font-semibold uppercase tracking-normal text-muted">Shadow wins</p>
+          <p className="mt-3 text-sm font-semibold leading-6 text-ink">
             {streakInsight.count > 0
               ? `Shadow has outperformed you in ${streakInsight.axis} for ${streakInsight.count} straight ${
                   streakInsight.count === 1 ? "day" : "days"
@@ -218,10 +216,10 @@ export function Dashboard() {
           variants={cardVariants}
           initial="rest"
           whileHover="hover"
-          className="rounded-md border border-[#dfe3ea] bg-white p-4"
+          className="rounded-md border border-line bg-card p-4"
         >
-          <p className="text-xs font-semibold uppercase tracking-normal text-[#626976]">Critical threshold</p>
-          <p className="mt-3 text-sm font-semibold leading-6 text-[#202124]">
+          <p className="text-xs font-semibold uppercase tracking-normal text-muted">Critical threshold</p>
+          <p className="mt-3 text-sm font-semibold leading-6 text-ink">
             {criticalThreshold
               ? `Projected ${criticalThreshold.category} crosses recovery threshold in ${
                   criticalThreshold.day
@@ -230,7 +228,7 @@ export function Dashboard() {
                 ? "No recovery threshold is crossed in 30 days"
                 : "Threshold projection unlocks after seven logged days"}
           </p>
-          <p className="mt-2 text-xs leading-5 text-[#626976]">
+          <p className="mt-2 text-xs leading-5 text-muted">
             {criticalThreshold
               ? `Floor: ${CRITICAL_THRESHOLDS[criticalThreshold.category]} ${toLowerLabel(
                   criticalThreshold.category
