@@ -46,8 +46,11 @@ export type SimulationVerdict = {
   narrative: SimulationNarrative;
   generatedAt: string;
   lastInputDate: string;
-  source?: "claude" | "template";
+  source?: SimulationProvider | "template";
 };
+
+export const SIMULATION_PROVIDERS = ["anthropic", "openai", "gemini", "grok"] as const;
+export type SimulationProvider = (typeof SIMULATION_PROVIDERS)[number];
 
 export const HABITS = {
   sleep: {
@@ -172,11 +175,14 @@ export const simulationVerdictSchema = z.object({
   narrative: simulationNarrativeSchema,
   generatedAt: z.string().min(1),
   lastInputDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  source: z.enum(["claude", "template"]).optional()
+  source: z.enum([...SIMULATION_PROVIDERS, "template"]).optional()
 });
 
 export const simulationRequestSchema = z.object({
-  logs: z.array(habitLogSchema).min(1)
+  logs: z.array(habitLogSchema).min(1),
+  provider: z.enum(SIMULATION_PROVIDERS).optional(),
+  apiKey: z.string().min(1).optional(),
+  model: z.string().min(1).optional()
 });
 
 export function clamp(value: number, min: number, max: number): number {

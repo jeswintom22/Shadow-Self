@@ -132,6 +132,24 @@ describe("template fallback", () => {
     await app.close();
   });
 
+  it("passes provider credentials to the service", async () => {
+    const run = vi.fn(async (logs: HabitLog[]) => createVerdict(logs));
+    const app = await withApp({ run });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/simulation/run",
+      payload: { logs: createMockLogs(), provider: "openai", apiKey: "sk-test", model: "gpt-4o-mini" }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(run).toHaveBeenCalledWith(expect.any(Array), {
+      provider: "openai",
+      apiKey: "sk-test",
+      model: "gpt-4o-mini"
+    });
+    await app.close();
+  });
+
   it("rate limits repeated requests", async () => {
     const app = await withApp({ run: vi.fn(async (logs: HabitLog[]) => createVerdict(logs)) });
     const statuses = [];

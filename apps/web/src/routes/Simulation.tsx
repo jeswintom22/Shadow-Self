@@ -1,9 +1,11 @@
 import { getLatestLogs } from "@shadow-self/shared";
-import { AlertCircle, RefreshCcw, WandSparkles } from "lucide-react";
+import { AlertCircle, Moon, RefreshCcw, WandSparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { runSimulation } from "../api/simulation.js";
 import { EmptyState } from "../components/EmptyState.js";
 import { ScoreChart } from "../components/ScoreCharts.js";
+import { PROVIDER_LABELS } from "../lib/aiSettings.js";
 import { projectionToChartData } from "../lib/chartData.js";
 import { useHabitStore } from "../store/habitStore.js";
 
@@ -93,8 +95,24 @@ export function Simulation() {
       </header>
 
       {isLoading ? (
-        <section className="rounded-md border border-line bg-card p-6 text-sm text-muted">
-          Calculating the next thirty days, then sending the fixed projection to Claude.
+        <section className="flex flex-col items-center gap-4 rounded-md border border-line bg-card px-6 py-10 text-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-line"
+            style={{ borderTopColor: "rgb(var(--accent))" }}
+            aria-hidden="true"
+          >
+            <Moon size={20} className="text-accent" />
+          </motion.div>
+          <div className="h-1.5 w-48 overflow-hidden rounded-full bg-subtle">
+            <motion.div
+              className="h-full w-1/3 rounded-full bg-accent"
+              animate={{ x: ["0%", "200%"] }}
+              transition={{ duration: 1.1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+            />
+          </div>
+          <p className="text-sm text-muted">Projecting the next thirty days and writing your summary…</p>
         </section>
       ) : null}
 
@@ -103,10 +121,12 @@ export function Simulation() {
           {verdict.source ? (
             <span
               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-normal ${
-                verdict.source === "claude" ? "bg-accent-soft text-accent" : "bg-subtle text-muted"
+                verdict.source === "template" ? "bg-subtle text-muted" : "bg-accent-soft text-accent"
               }`}
             >
-              {verdict.source === "claude" ? "written by Claude" : "built-in summary — no AI key configured"}
+              {verdict.source === "template"
+                ? "built-in summary — no AI key configured"
+                : `written by ${PROVIDER_LABELS[verdict.source] ?? verdict.source}`}
             </span>
           ) : null}
           <section className="grid gap-4 lg:grid-cols-3">

@@ -1,7 +1,9 @@
-import { Activity, BarChart3, Moon, MoonStar, Settings, Sun, WandSparkles } from "lucide-react";
+import { Activity, BarChart3, CircleHelp, Moon, MoonStar, Settings, Sun, WandSparkles } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { getTheme, setTheme, type Theme } from "../lib/theme.js";
+import { hasSeenTour, markTourSeen } from "../lib/tour.js";
+import { Walkthrough } from "./Walkthrough.js";
 
 const navItems = [
   { to: "/log", label: "Log", icon: Activity },
@@ -20,6 +22,13 @@ function navLinkClass(isActive: boolean, base: string): string {
 
 export function Layout() {
   const [theme, setThemeState] = useState<Theme>(getTheme);
+  const [showTour, setShowTour] = useState(() => {
+    const firstVisit = !hasSeenTour();
+    if (firstVisit) {
+      markTourSeen();
+    }
+    return firstVisit;
+  });
   const ThemeIcon = theme === "dark" ? Sun : MoonStar;
 
   function toggleTheme() {
@@ -42,14 +51,24 @@ export function Layout() {
                 <p className="text-sm text-muted">habit projection</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-card text-soft transition hover:border-line-strong sm:hidden"
-            >
-              <ThemeIcon size={17} aria-hidden="true" />
-            </button>
+            <div className="flex gap-2 sm:hidden">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-card text-soft transition hover:border-line-strong"
+              >
+                <ThemeIcon size={17} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTour(true)}
+                aria-label="Open walkthrough"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-card text-soft transition hover:border-line-strong"
+              >
+                <CircleHelp size={17} aria-hidden="true" />
+              </button>
+            </div>
           </div>
           <nav aria-label="Primary navigation" className="hidden flex-wrap items-center gap-2 sm:flex">
             {navItems.map((item) => {
@@ -75,6 +94,14 @@ export function Layout() {
               className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-card text-soft transition hover:border-line-strong"
             >
               <ThemeIcon size={17} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowTour(true)}
+              aria-label="Open walkthrough"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-card text-soft transition hover:border-line-strong"
+            >
+              <CircleHelp size={17} aria-hidden="true" />
             </button>
           </nav>
         </div>
@@ -112,6 +139,7 @@ export function Layout() {
           })}
         </div>
       </nav>
+      {showTour ? <Walkthrough onClose={() => setShowTour(false)} /> : null}
     </div>
   );
 }

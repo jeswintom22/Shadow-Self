@@ -30,7 +30,11 @@ export const simulationRoutes: FastifyPluginAsync<SimulationRoutesOptions> = asy
     }
 
     try {
-      return await options.simulationService.run(logs);
+      return await options.simulationService.run(logs, {
+        provider: parsed.data.provider,
+        apiKey: parsed.data.apiKey,
+        model: parsed.data.model
+      });
     } catch (error) {
       if (error instanceof SimulationSetupError) {
         return reply.status(503).send({

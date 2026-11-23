@@ -21,6 +21,7 @@ import { useMemo } from "react";
 import { EmptyState } from "../components/EmptyState.js";
 import { HabitComparisonTable } from "../components/HabitComparisonTable.js";
 import { ScoreChart } from "../components/ScoreCharts.js";
+import { ShadowRace } from "../components/ShadowRace.js";
 import { historyToChartData } from "../lib/chartData.js";
 import { cardVariants } from "../lib/motion.js";
 import { useHabitStore } from "../store/habitStore.js";
@@ -237,6 +238,8 @@ export function Dashboard() {
           </p>
         </motion.article>
       </section>
+
+      {history.at(-1) ? <ShadowRace user={history.at(-1)!.user} shadow={history.at(-1)!.shadow} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ScoreChart title="Focus" axis="focus" data={data} compact showThresholdMarkers={Boolean(projection)} />

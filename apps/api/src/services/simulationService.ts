@@ -1,7 +1,13 @@
-import type { HabitLog, SimulationVerdict } from "@shadow-self/shared";
+import type { HabitLog, SimulationProvider, SimulationVerdict } from "@shadow-self/shared";
+
+export type SimulationCredentials = {
+  provider?: SimulationProvider;
+  apiKey?: string;
+  model?: string;
+};
 
 export type SimulationService = {
-  run(logs: HabitLog[]): Promise<SimulationVerdict>;
+  run(logs: HabitLog[], credentials?: SimulationCredentials): Promise<SimulationVerdict>;
 };
 
 export class SimulationSetupError extends Error {

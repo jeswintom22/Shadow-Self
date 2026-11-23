@@ -34,26 +34,39 @@ pnpm lint
 pnpm build
 ```
 
-## The simulation and Claude
+## The simulation and AI
 
-Set `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` in `.env` to have Claude write the projection narrative.
-**Everything works without a key** — without one, the API returns a built-in summary generated from the
-deterministic projection (the verdict is marked `"source": "template"` vs `"claude"`).
+The projection math is deterministic; an AI only writes the summary. Pick any supported provider —
+**Anthropic, OpenAI, Gemini, or Grok** — either by:
+
+- pasting a key in the app's **Settings → AI narration** — stored only in the browser and used to call the
+  provider directly (works with no backend at all), or
+- setting `<PROVIDER>_API_KEY` / `<PROVIDER>_MODEL` in `.env` on the optional API (see `.env.example`).
+
+**Everything works without a key** — the API returns a built-in summary generated from the deterministic
+projection (the verdict's `"source"` is `"template"`, otherwise the provider name).
 
 ## Deploy
 
-The repo ships with ready-to-use configs:
+The app is **fully static** — the browser computes projections locally and calls the AI provider directly
+with the key the user enters in Settings. No backend required.
 
-- **Web → Netlify** (`netlify.toml`): import the repo, set `VITE_API_BASE_URL` to your API URL. Any static
-  host works — build `apps/web` and publish `apps/web/dist` with an SPA fallback to `index.html`.
-- **API → Render** (`render.yaml`): import the repo as a Blueprint. Set `CORS_ORIGIN` to your site's URL and
-  optionally `ANTHROPIC_API_KEY`. Health check is `GET /health`.
+- **Vercel (free)** — import the repo; `vercel.json` already configures the pnpm build and SPA rewrites.
+- **Netlify** — `netlify.toml` does the same.
+- Any static host works — build `apps/web` and publish `apps/web/dist` with an SPA fallback to `index.html`.
+
+The optional Fastify API (`apps/api`) is only needed if you want **server-side** keys — deploy it with
+`render.yaml`, set `VITE_API_BASE_URL` on the web app, and it will be used when the user has no key of their
+own. Without it, the built-in summary still covers that case.
 
 ### Server env vars
 
 | Var | Purpose |
 | --- | --- |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | Claude narrative (optional) |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | OpenAI narrative (optional) |
+| `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini narrative (optional) |
+| `GROK_API_KEY` / `GROK_MODEL` | Grok narrative — `XAI_API_KEY` also works (optional) |
 | `CORS_ORIGIN` | Comma-separated allowlist; unset = allow all (local dev) |
 | `RATE_LIMIT_MAX` | Requests/minute per IP (default 10) |
 | `API_PORT` / `API_HOST` | Listen address |
