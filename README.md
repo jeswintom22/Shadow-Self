@@ -1,5 +1,7 @@
 # Shadow Self
 
+**Live: https://shadow-self-rho.vercel.app**
+
 Log five daily habits and meet the version of you that does the exact opposite. After seven days, the app
 projects thirty days of energy, focus, and mood — for you, and for your Shadow.
 
@@ -51,7 +53,9 @@ projection (the verdict's `"source"` is `"template"`, otherwise the provider nam
 The app is **fully static** — the browser computes projections locally and calls the AI provider directly
 with the key the user enters in Settings. No backend required.
 
-- **Vercel (free)** — import the repo; `vercel.json` already configures the pnpm build and SPA rewrites.
+- **Vercel (free)** — this app is deployed at https://shadow-self-rho.vercel.app; the project is connected
+  to GitHub, so every push to `main` redeploys automatically. `vercel.json` configures the pnpm build and
+  SPA rewrites.
 - **Netlify** — `netlify.toml` does the same.
 - Any static host works — build `apps/web` and publish `apps/web/dist` with an SPA fallback to `index.html`.
 
